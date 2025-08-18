@@ -443,7 +443,13 @@
             }
 
             const { githubOwner, githubRepo, githubBranch } = blogSourceConfig;
-            const apiUrl = `https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/posts?ref=${encodeURIComponent(githubBranch)}`;
+            // Determine site subdirectory (e.g., /devlog/) so we can look up devlog/posts not root posts
+            const pathParts = (window.location.pathname || '/').split('/').filter(Boolean);
+            // Assume index.html is under something like /devlog/; posts are under that dir's posts/
+            const baseDir = pathParts.length > 0 ? pathParts[0] : '';
+            const postsDirInRepo = baseDir ? `${baseDir}/posts` : 'posts';
+
+            const apiUrl = `https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/${postsDirInRepo}?ref=${encodeURIComponent(githubBranch)}`;
             const resp = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } });
             if (!resp.ok) throw new Error('GitHub API error');
             const items = await resp.json();
@@ -453,7 +459,7 @@
 
             // Fetch contents to extract metadata
             const posts = await Promise.all(mdFiles.map(async (file, idx) => {
-                const rawUrl = `https://raw.githubusercontent.com/${githubOwner}/${githubRepo}/${githubBranch}/posts/${encodeURIComponent(file.name)}`;
+                const rawUrl = `https://raw.githubusercontent.com/${githubOwner}/${githubRepo}/${githubBranch}/${postsDirInRepo}/${encodeURIComponent(file.name)}`;
                 try {
                     const fileResp = await fetch(rawUrl);
                     if (!fileResp.ok) return null;
