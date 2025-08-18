@@ -1,3 +1,6 @@
+---
+layout: null
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -54,6 +57,7 @@
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(10px);
         }
 
         .header-content {
@@ -66,6 +70,9 @@
             font-size: 24px;
             font-weight: bold;
             color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .theme-toggle {
@@ -82,10 +89,12 @@
         .theme-toggle:hover {
             background-color: var(--accent-color);
             color: var(--bg-color);
+            transform: translateY(-1px);
         }
 
         main {
             padding: 40px 0;
+            min-height: 60vh;
         }
 
         .blog-header {
@@ -96,6 +105,10 @@
         .blog-title {
             font-size: 36px;
             margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--accent-color), #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .blog-description {
@@ -109,7 +122,8 @@
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         }
 
-        .post-card {
+        a.post-card {
+            display: block;
             background-color: var(--secondary-bg);
             border-radius: 12px;
             padding: 25px;
@@ -117,11 +131,31 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .post-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(45deg, var(--accent-color), #e74c3c);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
         }
 
         .post-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 15px var(--card-shadow);
+        }
+
+        .post-card:hover::before {
+            transform: scaleX(1);
         }
 
         .post-meta {
@@ -156,22 +190,32 @@
             color: var(--bg-color);
             font-size: 12px;
             padding: 4px 8px;
-            border-radius: 4px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            transform: scale(1.05);
         }
 
         .back-button {
             background-color: var(--accent-color);
             color: var(--bg-color);
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             margin-bottom: 20px;
-            transition: background-color 0.3s ease;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .back-button:hover {
             background-color: var(--accent-hover);
+            transform: translateY(-1px);
         }
 
         .post-full {
@@ -179,11 +223,13 @@
             padding: 30px;
             border-radius: 12px;
             border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px var(--card-shadow);
         }
 
         .post-full h1 {
             margin-bottom: 20px;
             color: var(--text-color);
+            font-size: 28px;
         }
 
         .post-full h2, .post-full h3 {
@@ -209,6 +255,7 @@
             padding: 2px 6px;
             border-radius: 4px;
             font-family: 'Monaco', 'Consolas', monospace;
+            border: 1px solid var(--border-color);
         }
 
         .post-full pre {
@@ -217,22 +264,40 @@
             border-radius: 6px;
             overflow-x: auto;
             margin: 15px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .post-full pre code {
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .loading, .error, .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            font-size: 16px;
+            border-radius: 12px;
+            background-color: var(--secondary-bg);
+            border: 1px solid var(--border-color);
         }
 
         .loading {
-            text-align: center;
             color: var(--text-secondary);
-            padding: 40px;
-            font-size: 16px;
+            animation: pulse 2s infinite;
         }
 
         .error {
-            text-align: center;
             color: #e74c3c;
-            padding: 40px;
-            background-color: var(--secondary-bg);
-            border-radius: 12px;
-            margin: 20px 0;
+        }
+
+        .empty-state {
+            color: var(--text-secondary);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
 
         footer {
@@ -244,6 +309,7 @@
             margin-top: 50px;
         }
 
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container {
                 padding: 0 15px;
@@ -269,6 +335,21 @@
             .post-full {
                 padding: 20px;
             }
+
+            .post-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+
+        /* Additional animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -276,7 +357,10 @@
     <header>
         <div class="container">
             <div class="header-content">
-                <div class="logo">🎮 GameDev Blog</div>
+                <div class="logo">
+                    <span>🏴‍☠️</span>
+                    <span>Pirates World DevLog</span>
+                </div>
                 <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Theme</button>
             </div>
         </div>
@@ -284,363 +368,73 @@
 
     <main>
         <div class="container">
-            <div id="blog-list">
+            <div id="blog-list" class="fade-in">
                 <div class="blog-header">
                     <h1 class="blog-title">Pirates World Game DevLog</h1>
-                    <p class="blog-description">Follow for updates</p>
+                    <p class="blog-description">Follow the development journey of our pirate adventure game</p>
                 </div>
 
+                <!-- Jekyll loop: this will automatically list posts from _posts/ -->
                 <div class="posts-grid" id="posts-container">
-                    <div class="loading">📖 Blog pages loading...</div>
+                    {% if site.posts == empty %}
+                        <div class="empty-state">
+                            <h3>🏴‍☠️ No Posts Yet</h3>
+                            <p>The captain's log is empty. Add markdown files to <code>_posts/</code> in the format <code>YYYY-MM-DD-title.md</code> with proper front-matter.</p>
+                        </div>
+                    {% else %}
+                        {% for post in site.posts %}
+                            <a class="post-card" href="{{ post.url }}">
+                                <div class="post-meta">
+                                    <span>📅 {{ post.date | date: "%B %-d, %Y" }}</span>
+                                    {% if post.read_time %}<span>⏱️ {{ post.read_time }}</span>{% endif %}
+                                </div>
+                                <h2 class="post-title">{{ post.title }}</h2>
+                                <p class="post-excerpt">{{ post.excerpt | strip_html | truncate: 200 }}</p>
+                                <div class="post-tags">
+                                    {% if post.tags %}
+                                        {% for tag in post.tags %}
+                                            <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                            </a>
+                        {% endfor %}
+                    {% endif %}
                 </div>
-            </div>
-
-            <div id="post-view" style="display: none;">
-                <button class="back-button" onclick="showBlogList()">← Back</button>
-                <div id="post-content-container"></div>
             </div>
         </div>
     </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 Umut Faruk Dilli</p>
+            <p>&copy; 2025 Umut Faruk Dilli - Pirates World Game Development</p>
         </div>
     </footer>
 
     <script>
-        let blogPosts = [];
-        const blogSourceConfig = {
-            preferGitHub: true,
-            githubOwner: null,
-            githubRepo: null,
-            githubBranch: 'main'
-        };
-
-        function detectGitHubRepoFromLocation() {
-            try {
-                const host = window.location.hostname || '';
-                if (!host.endsWith('github.io')) return null;
-                const owner = host.split('.')[0];
-                const pathParts = (window.location.pathname || '').split('/').filter(Boolean);
-                const repo = pathParts.length > 0 ? pathParts[0] : null;
-                if (owner && repo) return { owner, repo };
-                return null;
-            } catch (_) {
-                return null;
-            }
-        }
-
-        // Theme toggle
+        // Theme toggle (keeps simple, no localStorage)
         function toggleTheme() {
             const body = document.body;
             const button = document.querySelector('.theme-toggle');
-            
+
             if (body.getAttribute('data-theme') === 'light') {
                 body.setAttribute('data-theme', 'dark');
-                button.textContent = '☀️ Light Theme';
-                localStorage.setItem('theme', 'dark');
+                button.innerHTML = '☀️ Light Theme';
             } else {
                 body.setAttribute('data-theme', 'light');
-                button.textContent = '🌙 Dark Theme';
-                localStorage.setItem('theme', 'light');
+                button.innerHTML = '🌙 Dark Theme';
             }
         }
 
-        // Load theme preference
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'dark';
             const body = document.body;
             const button = document.querySelector('.theme-toggle');
-            
-            body.setAttribute('data-theme', savedTheme);
-            button.textContent = savedTheme === 'dark' ? '☀️ Light Theme' : '🌙 Dark Theme';
+            body.setAttribute('data-theme', 'dark');
+            button.innerHTML = '☀️ Light Theme';
         }
 
-        // Load blog metadata
-        async function loadBlogMeta() {
-            try {
-                const response = await fetch('posts/index.json');
-                if (!response.ok) throw new Error('Cannot load blog metadata');
-                
-                const data = await response.json();
-                blogPosts = data.posts || [];
-                renderBlogPosts();
-            } catch (error) {
-                console.error('Error while loading blog metadata:', error);
-                
-                // Try GitHub API discovery first (if possible), then fallback to sequential discovery
-                try {
-                    await discoverPostsViaGitHub();
-                } catch (ghErr) {
-                    try {
-                        await discoverPosts();
-                    } catch (_) {
-                        showError('Could not load blog posts.');
-                    }
-                }
-            }
-        }
-
-        // Automatically discover files in the posts folder (sequential fallback)
-        async function discoverPosts() {
-            const discoveredPosts = [];
-            const maxPosts = 20; // Maximum number of posts to check
-
-            for (let i = 0; i < maxPosts; i++) {
-                try {
-                    const filename = `post_${i}.md`;
-                    const response = await fetch(`posts/${filename}`);
-                    
-                    if (response.ok) {
-                        const content = await response.text();
-                        const post = parseMarkdownFile(content, filename, i + 1, `posts/${filename}`);
-                        if (post) discoveredPosts.push(post);
-                    } else {
-                        // If a file is not found, assume we've reached the end of the sequence
-                        if (response.status === 404) break; 
-                    }
-                } catch (error) {
-                    // File not found, continue to the next one
-                    continue;
-                }
-            }
-
-            if (discoveredPosts.length === 0) {
-                showError('No blog posts found yet. Add your .md files to the posts/ folder, named as post_0.md, post_1.md, etc.');
-                return;
-            }
-
-            blogPosts = discoveredPosts;
-            renderBlogPosts();
-        }
-
-        // Discover posts using GitHub API (works on GitHub Pages or when repo info is known)
-        async function discoverPostsViaGitHub() {
-            // Allow manual override via query string: ?gh=owner/repo&branch=main
-            const params = new URLSearchParams(window.location.search);
-            const ghParam = params.get('gh');
-            const branchParam = params.get('branch');
-            if (ghParam) {
-                const parts = ghParam.split('/');
-                if (parts.length === 2) {
-                    blogSourceConfig.githubOwner = parts[0];
-                    blogSourceConfig.githubRepo = parts[1];
-                }
-            }
-            if (branchParam) blogSourceConfig.githubBranch = branchParam;
-
-            if (!blogSourceConfig.githubOwner || !blogSourceConfig.githubRepo) {
-                const detected = detectGitHubRepoFromLocation();
-                if (detected) {
-                    blogSourceConfig.githubOwner = detected.owner;
-                    blogSourceConfig.githubRepo = detected.repo;
-                }
-            }
-
-            if (!blogSourceConfig.preferGitHub || !blogSourceConfig.githubOwner || !blogSourceConfig.githubRepo) {
-                throw new Error('GitHub repo not configured');
-            }
-
-            const { githubOwner, githubRepo, githubBranch } = blogSourceConfig;
-            // Determine site subdirectory (e.g., /devlog/) so we can look up devlog/posts not root posts
-            const pathParts = (window.location.pathname || '/').split('/').filter(Boolean);
-            // Assume index.html is under something like /devlog/; posts are under that dir's posts/
-            const baseDir = pathParts.length > 0 ? pathParts[0] : '';
-            const postsDirInRepo = baseDir ? `${baseDir}/posts` : 'posts';
-
-            const apiUrl = `https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/${postsDirInRepo}?ref=${encodeURIComponent(githubBranch)}`;
-            const resp = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } });
-            if (!resp.ok) throw new Error('GitHub API error');
-            const items = await resp.json();
-
-            const mdFiles = (Array.isArray(items) ? items : []).filter(it => it && it.type === 'file' && /\.md$/i.test(it.name));
-            if (mdFiles.length === 0) throw new Error('No markdown files in posts/');
-
-            // Fetch contents to extract metadata
-            const posts = await Promise.all(mdFiles.map(async (file, idx) => {
-                const rawUrl = `https://raw.githubusercontent.com/${githubOwner}/${githubRepo}/${githubBranch}/${postsDirInRepo}/${encodeURIComponent(file.name)}`;
-                try {
-                    const fileResp = await fetch(rawUrl);
-                    if (!fileResp.ok) return null;
-                    const content = await fileResp.text();
-                    return parseMarkdownFile(content, file.name, idx + 1, rawUrl);
-                } catch (_) {
-                    return null;
-                }
-            }));
-
-            const discovered = posts.filter(Boolean);
-            if (discovered.length === 0) throw new Error('Could not fetch markdown contents');
-
-            // Sort by filename descending as a simple heuristic (newer posts often have higher numbers or dates)
-            discovered.sort((a, b) => b.file.localeCompare(a.file));
-            blogPosts = discovered;
-            renderBlogPosts();
-        }
-
-        // Parse markdown file and extract basic metadata
-        function parseMarkdownFile(content, filename, id, fileUrlOverride) {
-            const lines = content.split('\n');
-            const metadata = {};
-            let contentStart = 0;
-
-            // Front matter parse et (--- ile başlayıp bitiyorsa)
-            if (lines[0] === '---') {
-                for (let i = 1; i < lines.length; i++) {
-                    if (lines[i] === '---') {
-                        contentStart = i + 1;
-                        break;
-                    }
-                    
-                    const match = lines[i].match(/^(\w+):\s*(.+)$/);
-                    if (match) {
-                        metadata[match[1]] = match[2].replace(/['"]/g, '');
-                    }
-                }
-            }
-
-            // İçerikten başlık ve özet çıkar
-            const contentLines = lines.slice(contentStart);
-            const title = metadata.title || 
-                         contentLines.find(line => line.startsWith('# '))?.replace('# ', '') ||
-                         filename.replace('.md', '').replace(/-/g, ' ');
-                         
-            const excerpt = metadata.excerpt || 
-                           contentLines.find(line => line.trim() && !line.startsWith('#'))?.substring(0, 150) + '...' ||
-                           'Blog post content...';
-
-            return {
-                id: id,
-                title: title,
-                excerpt: excerpt,
-                date: metadata.date || new Date().toLocaleDateString('en-US'),
-                readTime: metadata.readTime || Math.ceil(content.length / 1000) + ' min',
-                tags: metadata.tags ? metadata.tags.split(',').map(tag => tag.trim()) : ['Blog'],
-                file: filename,
-                url: fileUrlOverride || `posts/${filename}`
-            };
-        }
-
-        // Render blog post cards
-        function renderBlogPosts() {
-            const container = document.getElementById('posts-container');
-            
-            if (blogPosts.length === 0) {
-                container.innerHTML = '<div class="loading">No blog posts found.</div>';
-                return;
-            }
-
-            container.innerHTML = blogPosts.map(post => `
-                <div class="post-card" onclick="loadPost('${post.url}', ${post.id})">
-                    <div class="post-meta">
-                        <span>📅 ${post.date}</span>
-                        <span>⏱️ ${post.readTime}</span>
-                    </div>
-                    <h2 class="post-title">${post.title}</h2>
-                    <p class="post-excerpt">${post.excerpt}</p>
-                    <div class="post-tags">
-                        ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        // Render error message
-        function showError(message) {
-            const container = document.getElementById('posts-container');
-            container.innerHTML = `<div class="error">${message}</div>`;
-        }
-
-        // Show blog list view
-        function showBlogList() {
-            document.getElementById('blog-list').style.display = 'block';
-            document.getElementById('post-view').style.display = 'none';
-        }
-
-        // Load a single blog post content
-        async function loadPost(fileUrl, postId) {
-            const post = blogPosts.find(p => p.id === postId);
-            if (!post) return;
-
-            try {
-                const response = await fetch(fileUrl);
-                if (!response.ok) throw new Error('Could not load file');
-                
-                const content = await response.text();
-                const htmlContent = parseMarkdown(content);
-                
-                document.getElementById('post-content-container').innerHTML = `
-                    <div class="post-full">
-                        <h1>${post.title}</h1>
-                        <div class="post-meta" style="margin-bottom: 20px;">
-                            <span>📅 ${post.date}</span>
-                            <span>⏱️ ${post.readTime}</span>
-                            <div class="post-tags" style="margin-top: 10px;">
-                                ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
-                            </div>
-                        </div>
-                        <div class="post-content">
-                            ${htmlContent}
-                        </div>
-                    </div>
-                `;
-
-                document.getElementById('blog-list').style.display = 'none';
-                document.getElementById('post-view').style.display = 'block';
-                window.scrollTo(0, 0);
-                
-            } catch (error) {
-                console.error('Error loading post:', error);
-                alert('An error occurred while loading the blog post.');
-            }
-        }
-
-        // Simple Markdown parser (very basic)
-        function parseMarkdown(markdown) {
-            // Remove front matter
-            markdown = markdown.replace(/^---[\s\S]*?---\n/, '');
-            
-            return markdown
-                // Headers
-                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
-                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
-                
-                // Bold
-                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
-                
-                // Italic
-                .replace(/\*(.*)\*/gim, '<em>$1</em>')
-                
-                // Code blocks
-                .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
-                
-                // Inline code
-                .replace(/`([^`]*)`/gim, '<code>$1</code>')
-                
-                // Links
-                .replace(/\[([^\]]*)\]\(([^\)]*)\)/gim, '<a href="$2">$1</a>')
-                
-                // Lists
-                .replace(/^\* (.*$)/gim, '<li>$1</li>')
-                .replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>')
-                
-                // Paragraphs
-                .replace(/\n\n/gim, '</p><p>')
-                .replace(/^(?!<[hul])/gim, '<p>')
-                .replace(/$/gim, '</p>')
-                
-                // Clean up
-                .replace(/<p><\/p>/gim, '')
-                .replace(/<p>(<[hul])/gim, '$1')
-                .replace(/(<\/[hul]>)<\/p>/gim, '$1');
-        }
-
-        // On page load
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
-            loadBlogMeta();
         });
     </script>
 </body>
