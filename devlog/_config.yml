@@ -1,7 +1,6 @@
 title: "Pirates World DevLog"
 description: "Follow the development journey of our pirate adventure game"
 markdown: kramdown
-theme: minima
 permalink: /:categories/:year/:month/:day/:title/
 
 # GitHub Pages ayarları
