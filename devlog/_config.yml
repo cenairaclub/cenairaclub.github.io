@@ -1,0 +1,23 @@
+title: Pirates World DevLog
+description: Follow the development journey of our pirate adventure game
+markdown: kramdown
+theme: null
+permalink: /:categories/:year/:month/:day/:title/
+
+defaults:
+  - scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      layout: post
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: page
+
+# Eğer proje sayfası olarak yayınlıyorsanız (user/org değilse) aşağıyı doldurun:
+# baseurl: "/REPO_ADI"
+# url: "https://KULLANICI_ADI.github.io"
+
+
