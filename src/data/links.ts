@@ -1,17 +1,17 @@
-import TwitterIcon from '@/components/icons/TwitterIcon'
+import YoutubeIcon from '@/components/icons/YoutubeIcon'
 import GithubIcon from '@/components/icons/GithubIcon'
 
 // ADD YOUR SOCIAL NETWORKS HERE
 export const SOCIALNETWORKS = [
 	{
 		name: 'Github',
-		url: 'https://github.com/danielcgilibert/blog-template',
+		url: 'https://github.com/cenairaclub',
 		icon: GithubIcon
 	},
 
 	{
-		name: 'Twitter',
-		url: 'https://github.com/danielcgilibert/blog-template',
-		icon: TwitterIcon
+		name: 'Youtube',
+		url: 'https://www.youtube.com/@umutfarukUE',
+		icon: YoutubeIcon
 	}
 ] as const
