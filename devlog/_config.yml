@@ -1,9 +1,14 @@
-title: Pirates World DevLog
-description: Follow the development journey of our pirate adventure game
+title: "Pirates World DevLog"
+description: "Follow the development journey of our pirate adventure game"
 markdown: kramdown
-theme: null
+theme: minima
 permalink: /:categories/:year/:month/:day/:title/
 
+# GitHub Pages ayarları
+baseurl: "/devlog" # repo içinde alt klasördeyse devlog yazmalısın
+url: "https://cenairaclub.github.io"
+
+# Varsayılan layout ayarları
 defaults:
   - scope:
       path: "_posts"
@@ -15,9 +20,3 @@ defaults:
       type: "pages"
     values:
       layout: page
-
-# Eğer proje sayfası olarak yayınlıyorsanız (user/org değilse) aşağıyı doldurun:
-# baseurl: "/REPO_ADI"
-# url: "https://KULLANICI_ADI.github.io"
-
-
