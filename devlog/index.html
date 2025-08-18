@@ -272,7 +272,7 @@
         }
     </style>
 </head>
-<body data-theme="light">
+<body data-theme="dark">
     <header>
         <div class="container">
             <div class="header-content">
@@ -310,8 +310,28 @@
 
     <script>
         let blogPosts = [];
+        const blogSourceConfig = {
+            preferGitHub: true,
+            githubOwner: null,
+            githubRepo: null,
+            githubBranch: 'main'
+        };
 
-        // Tema değiştirme
+        function detectGitHubRepoFromLocation() {
+            try {
+                const host = window.location.hostname || '';
+                if (!host.endsWith('github.io')) return null;
+                const owner = host.split('.')[0];
+                const pathParts = (window.location.pathname || '').split('/').filter(Boolean);
+                const repo = pathParts.length > 0 ? pathParts[0] : null;
+                if (owner && repo) return { owner, repo };
+                return null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        // Theme toggle
         function toggleTheme() {
             const body = document.body;
             const button = document.querySelector('.theme-toggle');
@@ -327,9 +347,9 @@
             }
         }
 
-        // Tema tercihini yükle
+        // Load theme preference
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             const body = document.body;
             const button = document.querySelector('.theme-toggle');
             
@@ -337,7 +357,7 @@
             button.textContent = savedTheme === 'dark' ? '☀️ Light Theme' : '🌙 Dark Theme';
         }
 
-        // Blog meta verilerini yükle
+        // Load blog metadata
         async function loadBlogMeta() {
             try {
                 const response = await fetch('posts/index.json');
@@ -349,16 +369,20 @@
             } catch (error) {
                 console.error('Error while loading blog metadata:', error);
                 
-                // Fallback: automatically discover files in the posts folder
+                // Try GitHub API discovery first (if possible), then fallback to sequential discovery
                 try {
-                    await discoverPosts();
-                } catch (fallbackError) {
-                    showError('Could not load blog posts.');
+                    await discoverPostsViaGitHub();
+                } catch (ghErr) {
+                    try {
+                        await discoverPosts();
+                    } catch (_) {
+                        showError('Could not load blog posts.');
+                    }
                 }
             }
         }
 
-        // Posts klasöründeki dosyaları otomatik keşfet
+        // Automatically discover files in the posts folder (sequential fallback)
         async function discoverPosts() {
             const discoveredPosts = [];
             const maxPosts = 20; // Maximum number of posts to check
@@ -370,7 +394,7 @@
                     
                     if (response.ok) {
                         const content = await response.text();
-                        const post = parseMarkdownFile(content, filename, i + 1);
+                        const post = parseMarkdownFile(content, filename, i + 1, `posts/${filename}`);
                         if (post) discoveredPosts.push(post);
                     } else {
                         // If a file is not found, assume we've reached the end of the sequence
@@ -391,8 +415,66 @@
             renderBlogPosts();
         }
 
-        // Markdown dosyasını parse et
-        function parseMarkdownFile(content, filename, id) {
+        // Discover posts using GitHub API (works on GitHub Pages or when repo info is known)
+        async function discoverPostsViaGitHub() {
+            // Allow manual override via query string: ?gh=owner/repo&branch=main
+            const params = new URLSearchParams(window.location.search);
+            const ghParam = params.get('gh');
+            const branchParam = params.get('branch');
+            if (ghParam) {
+                const parts = ghParam.split('/');
+                if (parts.length === 2) {
+                    blogSourceConfig.githubOwner = parts[0];
+                    blogSourceConfig.githubRepo = parts[1];
+                }
+            }
+            if (branchParam) blogSourceConfig.githubBranch = branchParam;
+
+            if (!blogSourceConfig.githubOwner || !blogSourceConfig.githubRepo) {
+                const detected = detectGitHubRepoFromLocation();
+                if (detected) {
+                    blogSourceConfig.githubOwner = detected.owner;
+                    blogSourceConfig.githubRepo = detected.repo;
+                }
+            }
+
+            if (!blogSourceConfig.preferGitHub || !blogSourceConfig.githubOwner || !blogSourceConfig.githubRepo) {
+                throw new Error('GitHub repo not configured');
+            }
+
+            const { githubOwner, githubRepo, githubBranch } = blogSourceConfig;
+            const apiUrl = `https://api.github.com/repos/${githubOwner}/${githubRepo}/contents/posts?ref=${encodeURIComponent(githubBranch)}`;
+            const resp = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' } });
+            if (!resp.ok) throw new Error('GitHub API error');
+            const items = await resp.json();
+
+            const mdFiles = (Array.isArray(items) ? items : []).filter(it => it && it.type === 'file' && /\.md$/i.test(it.name));
+            if (mdFiles.length === 0) throw new Error('No markdown files in posts/');
+
+            // Fetch contents to extract metadata
+            const posts = await Promise.all(mdFiles.map(async (file, idx) => {
+                const rawUrl = `https://raw.githubusercontent.com/${githubOwner}/${githubRepo}/${githubBranch}/posts/${encodeURIComponent(file.name)}`;
+                try {
+                    const fileResp = await fetch(rawUrl);
+                    if (!fileResp.ok) return null;
+                    const content = await fileResp.text();
+                    return parseMarkdownFile(content, file.name, idx + 1, rawUrl);
+                } catch (_) {
+                    return null;
+                }
+            }));
+
+            const discovered = posts.filter(Boolean);
+            if (discovered.length === 0) throw new Error('Could not fetch markdown contents');
+
+            // Sort by filename descending as a simple heuristic (newer posts often have higher numbers or dates)
+            discovered.sort((a, b) => b.file.localeCompare(a.file));
+            blogPosts = discovered;
+            renderBlogPosts();
+        }
+
+        // Parse markdown file and extract basic metadata
+        function parseMarkdownFile(content, filename, id, fileUrlOverride) {
             const lines = content.split('\n');
             const metadata = {};
             let contentStart = 0;
@@ -429,11 +511,12 @@
                 date: metadata.date || new Date().toLocaleDateString('en-US'),
                 readTime: metadata.readTime || Math.ceil(content.length / 1000) + ' min',
                 tags: metadata.tags ? metadata.tags.split(',').map(tag => tag.trim()) : ['Blog'],
-                file: filename
+                file: filename,
+                url: fileUrlOverride || `posts/${filename}`
             };
         }
 
-        // Blog postlarını listele
+        // Render blog post cards
         function renderBlogPosts() {
             const container = document.getElementById('posts-container');
             
@@ -443,7 +526,7 @@
             }
 
             container.innerHTML = blogPosts.map(post => `
-                <div class="post-card" onclick="loadPost('${post.file}', ${post.id})">
+                <div class="post-card" onclick="loadPost('${post.url}', ${post.id})">
                     <div class="post-meta">
                         <span>📅 ${post.date}</span>
                         <span>⏱️ ${post.readTime}</span>
@@ -457,25 +540,25 @@
             `).join('');
         }
 
-        // Hata mesajı göster
+        // Render error message
         function showError(message) {
             const container = document.getElementById('posts-container');
             container.innerHTML = `<div class="error">${message}</div>`;
         }
 
-        // Blog listesini göster
+        // Show blog list view
         function showBlogList() {
             document.getElementById('blog-list').style.display = 'block';
             document.getElementById('post-view').style.display = 'none';
         }
 
-        // Blog postunu yükle
-        async function loadPost(filename, postId) {
+        // Load a single blog post content
+        async function loadPost(fileUrl, postId) {
             const post = blogPosts.find(p => p.id === postId);
             if (!post) return;
 
             try {
-                const response = await fetch(`posts/${filename}`);
+                const response = await fetch(fileUrl);
                 if (!response.ok) throw new Error('Could not load file');
                 
                 const content = await response.text();
@@ -507,9 +590,9 @@
             }
         }
 
-        // Basit Markdown parser
+        // Simple Markdown parser (very basic)
         function parseMarkdown(markdown) {
-            // Front matter'ı kaldır
+            // Remove front matter
             markdown = markdown.replace(/^---[\s\S]*?---\n/, '');
             
             return markdown
@@ -548,7 +631,7 @@
                 .replace(/(<\/[hul]>)<\/p>/gim, '$1');
         }
 
-        // Sayfa yüklendiğinde
+        // On page load
         document.addEventListener('DOMContentLoaded', function() {
             loadTheme();
             loadBlogMeta();
