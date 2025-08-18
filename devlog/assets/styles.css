@@ -208,6 +208,73 @@ a.post-card {
     transform: translateY(-1px);
 }
 
+/* Page Content Styling */
+.page-content {
+    background-color: var(--secondary-bg);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px var(--card-shadow);
+}
+
+.page-content h1, .page-content h2, .page-content h3 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+.page-content h1 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.page-content h2 {
+    font-size: 24px;
+    margin: 25px 0 15px 0;
+}
+
+.page-content h3 {
+    font-size: 20px;
+    margin: 20px 0 10px 0;
+}
+
+.page-content p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.page-content ul, .page-content ol {
+    margin: 15px 0;
+    padding-left: 20px;
+}
+
+.page-content li {
+    margin-bottom: 5px;
+}
+
+.page-content code {
+    background-color: var(--bg-color);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Consolas', monospace;
+    border: 1px solid var(--border-color);
+}
+
+.page-content pre {
+    background-color: var(--bg-color);
+    padding: 15px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 15px 0;
+    border: 1px solid var(--border-color);
+}
+
+.page-content pre code {
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+/* Post Content Styling */
 .post-full {
     background-color: var(--secondary-bg);
     padding: 30px;
@@ -225,6 +292,14 @@ a.post-card {
 .post-full h2, .post-full h3 {
     margin: 20px 0 10px 0;
     color: var(--text-color);
+}
+
+.post-full h2 {
+    font-size: 24px;
+}
+
+.post-full h3 {
+    font-size: 20px;
 }
 
 .post-full p {
@@ -322,7 +397,7 @@ footer {
         gap: 15px;
     }
 
-    .post-full {
+    .post-full, .page-content {
         padding: 20px;
     }
 
@@ -341,5 +416,3 @@ footer {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
 }
-
-
