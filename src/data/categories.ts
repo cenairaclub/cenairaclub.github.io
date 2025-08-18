@@ -1,5 +1,5 @@
 // List of categories for blog posts
 export const CATEGORIES = [
 	'Update',
-	'DetailedUpdate'
+	'Detailed Update'
 ] as const
