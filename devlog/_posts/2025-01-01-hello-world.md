@@ -14,8 +14,8 @@ Bu, blog için örnek bir yazıdır. Karanlık/aydınlık tema tercihiniz taray�
 - Kod blokları
 - Etiketler ve meta bilgiler
 
-```js
-console.log('Merhaba Pirates World!');
+```gdscript
+print('Merhaba Pirates World!')
 ```
 
 
