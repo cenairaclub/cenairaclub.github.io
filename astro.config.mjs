@@ -6,7 +6,7 @@ import { remarkReadingTime } from './src/utils/readTime.ts'
 
 // https://astro.build/config
 export default defineConfig({
-	site: process.env.SITE ?? 'https://blog-template-gray.vercel.app/', // Overridden in CI for GitHub Pages
+	site: process.env.SITE ?? 'https://cenairaclub.github.io/', // Your GitHub Pages URL
 	base: process.env.BASE_PATH ?? '/',
 	markdown: {
 		remarkPlugins: [remarkReadingTime],

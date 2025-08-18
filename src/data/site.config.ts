@@ -8,10 +8,10 @@ interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-	author: 'DanielCG',
-	title: 'Astro Theme OpenBlog',
-	description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-	lang: 'en-GB',
-	ogLocale: 'en_GB',
-	shareMessage: 'Share this post' // Message to share a post on social media
+	author: 'Umut Faruk Dilli',
+	title: 'Pirates World DevLog',
+	description: 'Explore the development of \'Pirates World\' – a pirate adventure game. Get updates, behind-the-scenes insights, and progress straight from the dev team.',
+	lang: 'en-US',
+	ogLocale: 'en_US',
+	shareMessage: 'Share this dev update' // Message to share a post on social media
 }
