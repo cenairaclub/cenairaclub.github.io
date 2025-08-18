@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pirates World Game DevLog</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --secondary-bg: #f5f5f5;
+            --text-color: #333333;
+            --text-secondary: #666666;
+            --accent-color: #3498db;
+            --accent-hover: #2980b9;
+            --border-color: #e1e1e1;
+            --card-shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --secondary-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --accent-color: #4a9eff;
+            --accent-hover: #3d8bdb;
+            --border-color: #404040;
+            --card-shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--secondary-bg);
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 2px solid var(--accent-color);
+            color: var(--accent-color);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        main {
+            padding: 40px 0;
+        }
+
+        .blog-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .blog-title {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .blog-description {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        .posts-grid {
+            display: grid;
+            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .post-card {
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 6px var(--card-shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+        }
+
+        .post-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px var(--card-shadow);
+        }
+
+        .post-meta {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 10px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .post-title {
+            font-size: 20px;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .post-excerpt {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .post-tags {
+            margin-top: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .back-button {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .post-full {
+            background-color: var(--secondary-bg);
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .post-full h1 {
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .post-full h2, .post-full h3 {
+            margin: 20px 0 10px 0;
+            color: var(--text-color);
+        }
+
+        .post-full p {
+            margin-bottom: 15px;
+        }
+
+        .post-full ul, .post-full ol {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+
+        .post-full li {
+            margin-bottom: 5px;
+        }
+
+        .post-full code {
+            background-color: var(--bg-color);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Consolas', monospace;
+        }
+
+        .post-full pre {
+            background-color: var(--bg-color);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        .loading {
+            text-align: center;
+            color: var(--text-secondary);
+            padding: 40px;
+            font-size: 16px;
+        }
+
+        .error {
+            text-align: center;
+            color: #e74c3c;
+            padding: 40px;
+            background-color: var(--secondary-bg);
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        footer {
+            background-color: var(--secondary-bg);
+            padding: 30px 0;
+            text-align: center;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 50px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .blog-title {
+                font-size: 28px;
+            }
+
+            .posts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .post-card {
+                padding: 20px;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .post-full {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body data-theme="light">
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🎮 GameDev Blog</div>
+                <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Theme</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <div id="blog-list">
+                <div class="blog-header">
+                    <h1 class="blog-title">Pirates World Game DevLog</h1>
+                    <p class="blog-description">Follow for updates</p>
+                </div>
+
+                <div class="posts-grid" id="posts-container">
+                    <div class="loading">📖 Blog pages loading...</div>
+                </div>
+            </div>
+
+            <div id="post-view" style="display: none;">
+                <button class="back-button" onclick="showBlogList()">← Back</button>
+                <div id="post-content-container"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Umut Faruk Dilli</p>
+        </div>
+    </footer>
+
+    <script>
+        let blogPosts = [];
+
+        // Tema değiştirme
+        function toggleTheme() {
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+            
+            if (body.getAttribute('data-theme') === 'light') {
+                body.setAttribute('data-theme', 'dark');
+                button.textContent = '☀️ Light Theme';
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.setAttribute('data-theme', 'light');
+                button.textContent = '🌙 Dark Theme';
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Tema tercihini yükle
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const body = document.body;
+            const button = document.querySelector('.theme-toggle');
+            
+            body.setAttribute('data-theme', savedTheme);
+            button.textContent = savedTheme === 'dark' ? '☀️ Light Theme' : '🌙 Dark Theme';
+        }
+
+        // Blog meta verilerini yükle
+        async function loadBlogMeta() {
+            try {
+                const response = await fetch('posts/index.json');
+                if (!response.ok) throw new Error('Cannot load blog metadata');
+                
+                const data = await response.json();
+                blogPosts = data.posts || [];
+                renderBlogPosts();
+            } catch (error) {
+                console.error('Error while loading blog metadata:', error);
+                
+                // Fallback: automatically discover files in the posts folder
+                try {
+                    await discoverPosts();
+                } catch (fallbackError) {
+                    showError('Could not load blog posts.');
+                }
+            }
+        }
+
+        // Posts klasöründeki dosyaları otomatik keşfet
+        async function discoverPosts() {
+            const discoveredPosts = [];
+            const maxPosts = 20; // Maximum number of posts to check
+
+            for (let i = 0; i < maxPosts; i++) {
+                try {
+                    const filename = `post_${i}.md`;
+                    const response = await fetch(`posts/${filename}`);
+                    
+                    if (response.ok) {
+                        const content = await response.text();
+                        const post = parseMarkdownFile(content, filename, i + 1);
+                        if (post) discoveredPosts.push(post);
+                    } else {
+                        // If a file is not found, assume we've reached the end of the sequence
+                        if (response.status === 404) break; 
+                    }
+                } catch (error) {
+                    // File not found, continue to the next one
+                    continue;
+                }
+            }
+
+            if (discoveredPosts.length === 0) {
+                showError('No blog posts found yet. Add your .md files to the posts/ folder, named as post_0.md, post_1.md, etc.');
+                return;
+            }
+
+            blogPosts = discoveredPosts;
+            renderBlogPosts();
+        }
+
+        // Markdown dosyasını parse et
+        function parseMarkdownFile(content, filename, id) {
+            const lines = content.split('\n');
+            const metadata = {};
+            let contentStart = 0;
+
+            // Front matter parse et (--- ile başlayıp bitiyorsa)
+            if (lines[0] === '---') {
+                for (let i = 1; i < lines.length; i++) {
+                    if (lines[i] === '---') {
+                        contentStart = i + 1;
+                        break;
+                    }
+                    
+                    const match = lines[i].match(/^(\w+):\s*(.+)$/);
+                    if (match) {
+                        metadata[match[1]] = match[2].replace(/['"]/g, '');
+                    }
+                }
+            }
+
+            // İçerikten başlık ve özet çıkar
+            const contentLines = lines.slice(contentStart);
+            const title = metadata.title || 
+                         contentLines.find(line => line.startsWith('# '))?.replace('# ', '') ||
+                         filename.replace('.md', '').replace(/-/g, ' ');
+                         
+            const excerpt = metadata.excerpt || 
+                           contentLines.find(line => line.trim() && !line.startsWith('#'))?.substring(0, 150) + '...' ||
+                           'Blog post content...';
+
+            return {
+                id: id,
+                title: title,
+                excerpt: excerpt,
+                date: metadata.date || new Date().toLocaleDateString('en-US'),
+                readTime: metadata.readTime || Math.ceil(content.length / 1000) + ' min',
+                tags: metadata.tags ? metadata.tags.split(',').map(tag => tag.trim()) : ['Blog'],
+                file: filename
+            };
+        }
+
+        // Blog postlarını listele
+        function renderBlogPosts() {
+            const container = document.getElementById('posts-container');
+            
+            if (blogPosts.length === 0) {
+                container.innerHTML = '<div class="loading">No blog posts found.</div>';
+                return;
+            }
+
+            container.innerHTML = blogPosts.map(post => `
+                <div class="post-card" onclick="loadPost('${post.file}', ${post.id})">
+                    <div class="post-meta">
+                        <span>📅 ${post.date}</span>
+                        <span>⏱️ ${post.readTime}</span>
+                    </div>
+                    <h2 class="post-title">${post.title}</h2>
+                    <p class="post-excerpt">${post.excerpt}</p>
+                    <div class="post-tags">
+                        ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Hata mesajı göster
+        function showError(message) {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+
+        // Blog listesini göster
+        function showBlogList() {
+            document.getElementById('blog-list').style.display = 'block';
+            document.getElementById('post-view').style.display = 'none';
+        }
+
+        // Blog postunu yükle
+        async function loadPost(filename, postId) {
+            const post = blogPosts.find(p => p.id === postId);
+            if (!post) return;
+
+            try {
+                const response = await fetch(`posts/${filename}`);
+                if (!response.ok) throw new Error('Could not load file');
+                
+                const content = await response.text();
+                const htmlContent = parseMarkdown(content);
+                
+                document.getElementById('post-content-container').innerHTML = `
+                    <div class="post-full">
+                        <h1>${post.title}</h1>
+                        <div class="post-meta" style="margin-bottom: 20px;">
+                            <span>📅 ${post.date}</span>
+                            <span>⏱️ ${post.readTime}</span>
+                            <div class="post-tags" style="margin-top: 10px;">
+                                ${post.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            ${htmlContent}
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('blog-list').style.display = 'none';
+                document.getElementById('post-view').style.display = 'block';
+                window.scrollTo(0, 0);
+                
+            } catch (error) {
+                console.error('Error loading post:', error);
+                alert('An error occurred while loading the blog post.');
+            }
+        }
+
+        // Basit Markdown parser
+        function parseMarkdown(markdown) {
+            // Front matter'ı kaldır
+            markdown = markdown.replace(/^---[\s\S]*?---\n/, '');
+            
+            return markdown
+                // Headers
+                .replace(/^### (.*$)/gim, '<h3>$1</h3>')
+                .replace(/^## (.*$)/gim, '<h2>$1</h2>')
+                .replace(/^# (.*$)/gim, '<h1>$1</h1>')
+                
+                // Bold
+                .replace(/\*\*(.*)\*\*/gim, '<strong>$1</strong>')
+                
+                // Italic
+                .replace(/\*(.*)\*/gim, '<em>$1</em>')
+                
+                // Code blocks
+                .replace(/```([\s\S]*?)```/gim, '<pre><code>$1</code></pre>')
+                
+                // Inline code
+                .replace(/`([^`]*)`/gim, '<code>$1</code>')
+                
+                // Links
+                .replace(/\[([^\]]*)\]\(([^\)]*)\)/gim, '<a href="$2">$1</a>')
+                
+                // Lists
+                .replace(/^\* (.*$)/gim, '<li>$1</li>')
+                .replace(/(<li>.*<\/li>)/gim, '<ul>$1</ul>')
+                
+                // Paragraphs
+                .replace(/\n\n/gim, '</p><p>')
+                .replace(/^(?!<[hul])/gim, '<p>')
+                .replace(/$/gim, '</p>')
+                
+                // Clean up
+                .replace(/<p><\/p>/gim, '')
+                .replace(/<p>(<[hul])/gim, '$1')
+                .replace(/(<\/[hul]>)<\/p>/gim, '$1');
+        }
+
+        // Sayfa yüklendiğinde
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTheme();
+            loadBlogMeta();
+        });
+    </script>
+</body>
+</html>
