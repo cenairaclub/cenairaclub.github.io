@@ -1,11 +1,11 @@
 [
   {
     "filename": "welcome-to-my-blog.md",
-    "title": "Welcome to My Blog",
+    "title": "Welcome!",
     "date": "2025-08-19",
     "tags": [
       "welcome",
-      "first-post",
+      "solo-dev",
       "introduction"
     ],
     "excerpt": "This is my first blog post where I introduce myself and share what this blog will be about. Join me on this journey!",
