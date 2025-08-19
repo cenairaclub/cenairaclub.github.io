@@ -1,77 +1,129 @@
-name: Deploy to GitHub Pages
+name: Generate Posts JSON
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
+    branches: [ main, master ]
+    paths: 
+      - 'posts/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [ main, master ]
+    paths: 
+      - 'posts/**'
 
 permissions:
-  contents: read
+  contents: write
   pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
 
 jobs:
-  build:
+  generate-posts:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup PNPM
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Set Astro site/base for GitHub Pages
-        shell: bash
-        run: |
-          REPO_NAME="${GITHUB_REPOSITORY#*/}"
-          OWNER="$GITHUB_REPOSITORY_OWNER"
-          if [[ "$REPO_NAME" == "$OWNER.github.io" ]]; then
-            echo "Detected user/organization Pages repository"
-            echo "SITE=https://${OWNER}.github.io/" >> $GITHUB_ENV
-            echo "BASE_PATH=/" >> $GITHUB_ENV
-          else
-            echo "Detected project Pages repository"
-            echo "SITE=https://${OWNER}.github.io/${REPO_NAME}/" >> $GITHUB_ENV
-            echo "BASE_PATH=/${REPO_NAME}" >> $GITHUB_ENV
-          fi
-
-      - name: Build
-        run: pnpm run build
-
-      - name: Ensure GitHub Pages serves _pagefind
-        run: |
-          mkdir -p dist
-          touch dist/.nojekyll
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
-
-
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        
+    - name: Generate posts.json
+      run: |
+        node -e "
+        const fs = require('fs');
+        const path = require('path');
+        
+        // Function to parse frontmatter
+        function parseFrontmatter(content) {
+          const frontmatterRegex = /^---\s*\n(.*?)\n---\s*\n(.*)/s;
+          const match = content.match(frontmatterRegex);
+          
+          if (!match) {
+            return { frontmatter: {}, content: content };
+          }
+          
+          const frontmatter = {};
+          const frontmatterText = match[1];
+          const markdownContent = match[2];
+          
+          frontmatterText.split('\n').forEach(line => {
+            const [key, ...valueParts] = line.split(':');
+            if (key && valueParts.length) {
+              let value = valueParts.join(':').trim();
+              value = value.replace(/^[\"']|[\"']$/g, '');
+              
+              if (key.trim() === 'tags' && value.startsWith('[')) {
+                value = value.replace(/[\[\]]/g, '').split(',').map(tag => tag.trim().replace(/[\"']/g, ''));
+              }
+              
+              frontmatter[key.trim()] = value;
+            }
+          });
+          
+          return { frontmatter, content: markdownContent };
+        }
+        
+        // Function to generate excerpt from content
+        function generateExcerpt(content, maxLength = 150) {
+          // Remove markdown syntax
+          let text = content
+            .replace(/^#+\s+/gm, '')  // Remove headers
+            .replace(/\*\*(.*?)\*\*/g, '$1')  // Remove bold
+            .replace(/\*(.*?)\*/g, '$1')  // Remove italic
+            .replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1')  // Remove links
+            .replace(/\`([^\`]+)\`/g, '$1')  // Remove inline code
+            .replace(/\n+/g, ' ')  // Replace newlines with spaces
+            .trim();
+          
+          if (text.length <= maxLength) return text;
+          return text.substring(0, maxLength).replace(/\s+\w*$/, '') + '...';
+        }
+        
+        const postsDir = './posts';
+        const posts = [];
+        
+        if (fs.existsSync(postsDir)) {
+          const files = fs.readdirSync(postsDir);
+          
+          files.forEach(file => {
+            if (path.extname(file) === '.md') {
+              try {
+                const content = fs.readFileSync(path.join(postsDir, file), 'utf8');
+                const { frontmatter, content: markdownContent } = parseFrontmatter(content);
+                
+                // Generate post data
+                const post = {
+                  filename: file,
+                  title: frontmatter.title || file.replace('.md', '').replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+                  date: frontmatter.date || new Date().toISOString().split('T')[0],
+                  tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : 
+                        (frontmatter.tags ? [frontmatter.tags] : []),
+                  excerpt: frontmatter.excerpt || frontmatter.description || generateExcerpt(markdownContent),
+                  author: frontmatter.author || 'Author'
+                };
+                
+                posts.push(post);
+                console.log('Processed:', file);
+              } catch (error) {
+                console.error('Error processing file:', file, error.message);
+              }
+            }
+          });
+        }
+        
+        // Sort by date (newest first)
+        posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        // Write posts.json
+        fs.writeFileSync('./posts.json', JSON.stringify(posts, null, 2));
+        console.log('Generated posts.json with', posts.length, 'posts');
+        "
+        
+    - name: Commit and push posts.json
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add posts.json
+        git diff --staged --quiet || git commit -m "Auto-generate posts.json [skip ci]"
+        git push

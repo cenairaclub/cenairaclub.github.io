@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Blog</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e4e6ea;
+            background-color: #0d1117;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #21262d 0%, #30363d 100%);
+            color: white;
+            text-align: center;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border: 1px solid #30363d;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 300;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .back-button {
+            display: none;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.3);
+        }
+
+        .post-list {
+            display: block;
+        }
+
+        .post-detail {
+            display: none;
+            background: #161b22;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            border: 1px solid #30363d;
+        }
+
+        .post-preview {
+            background: #161b22;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            border: 1px solid #30363d;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .post-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            border-color: #58a6ff;
+        }
+
+        .post-header {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #30363d;
+        }
+
+        .post-title {
+            color: #f0f6fc;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .post-meta {
+            color: #8b949e;
+            font-size: 0.9rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .post-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #c9d1d9;
+        }
+
+        .post-content p {
+            margin-bottom: 1rem;
+        }
+
+        .post-content h1, .post-content h2, .post-content h3 {
+            margin: 1.5rem 0 1rem 0;
+            color: #f0f6fc;
+        }
+
+        .post-content h1 {
+            font-size: 2rem;
+            border-bottom: 2px solid #58a6ff;
+            padding-bottom: 0.5rem;
+        }
+
+        .post-content h2 {
+            font-size: 1.6rem;
+        }
+
+        .post-content h3 {
+            font-size: 1.3rem;
+        }
+
+        .post-content blockquote {
+            background: #21262d;
+            border-left: 4px solid #58a6ff;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+            border-radius: 4px;
+        }
+
+        .post-content code {
+            background: #21262d;
+            color: #f85149;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+        }
+
+        .post-content pre {
+            background: #21262d;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border: 1px solid #30363d;
+        }
+
+        .post-content pre code {
+            background: none;
+            padding: 0;
+            color: #c9d1d9;
+        }
+
+        .tag {
+            background: #1f6feb20;
+            color: #58a6ff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+            text-decoration: none;
+            border: 1px solid #1f6feb40;
+            transition: all 0.3s ease;
+        }
+
+        .tag:hover {
+            background: #1f6feb;
+            color: white;
+            border-color: #1f6feb;
+        }
+
+        .read-more {
+            color: #58a6ff;
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 1rem;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border: 2px solid #58a6ff;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .read-more:hover {
+            background-color: #58a6ff;
+            color: #0d1117;
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #8b949e;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid #30363d;
+            color: #8b949e;
+        }
+
+        .social-links {
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            color: #58a6ff;
+            text-decoration: none;
+            margin: 0 1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .social-links a:hover {
+            color: #79c0ff;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .post-preview {
+                padding: 1.5rem;
+            }
+
+            .post-title {
+                font-size: 1.5rem;
+            }
+
+            .post-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .post-detail {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <button class="back-button" onclick="showPostList()">← Back to Blog</button>
+            <h1>My Blog</h1>
+            <p>Sharing thoughts and experiences</p>
+        </header>
+
+        <main>
+            <div id="post-list" class="post-list">
+                <div class="loading">Loading posts...</div>
+            </div>
+
+            <div id="post-detail" class="post-detail">
+                <!-- Post content will be loaded here -->
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 My Blog. All rights reserved.</p>
+            <div class="social-links">
+                <a href="#" target="_blank">GitHub</a>
+                <a href="#" target="_blank">Twitter</a>
+                <a href="#" target="_blank">LinkedIn</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Posts will be auto-discovered from the posts/ directory
+        let discoveredPosts = [];
+
+        // Load posts from auto-generated posts.json
+        async function loadPostsData() {
+            try {
+                const response = await fetch('posts.json');
+                if (!response.ok) {
+                    throw new Error('posts.json not found');
+                }
+                discoveredPosts = await response.json();
+                // Sort posts by date (newest first)
+                discoveredPosts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                return discoveredPosts;
+            } catch (error) {
+                console.error('Error loading posts:', error);
+                // Return empty array if posts.json doesn't exist yet
+                return [];
+            }
+        }
+
+        // Parse frontmatter from markdown content
+        function parseFrontmatter(content) {
+            const frontmatterRegex = /^---\s*\n(.*?)\n---\s*\n(.*)/s;
+            const match = content.match(frontmatterRegex);
+            
+            if (!match) {
+                return { frontmatter: {}, content: content };
+            }
+            
+            const frontmatter = {};
+            const frontmatterText = match[1];
+            const markdownContent = match[2];
+            
+            frontmatterText.split('\n').forEach(line => {
+                const [key, ...valueParts] = line.split(':');
+                if (key && valueParts.length) {
+                    let value = valueParts.join(':').trim();
+                    value = value.replace(/^["']|["']$/g, ''); // Remove quotes
+                    
+                    if (key.trim() === 'tags' && value.startsWith('[')) {
+                        // Parse array format
+                        value = value.replace(/[\[\]]/g, '').split(',').map(tag => tag.trim().replace(/["']/g, ''));
+                    }
+                    
+                    frontmatter[key.trim()] = value;
+                }
+            });
+            
+            return { frontmatter, content: markdownContent };
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        // Create post preview HTML
+        function createPostPreview(post) {
+            const tagsHtml = post.tags.map(tag => 
+                `<span class="tag">${tag}</span>`
+            ).join('');
+
+            return `
+                <div class="post-preview" onclick="loadPost('${post.filename}')">
+                    <div class="post-header">
+                        <h2 class="post-title">${post.title}</h2>
+                        <div class="post-meta">
+                            <span>📅 ${formatDate(post.date)}</span>
+                            <span>👤 ${post.author || 'Author'}</span>
+                            <div>${tagsHtml}</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        <p>${post.excerpt}</p>
+                        <span class="read-more">Read More →</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Load and display post list
+        async function showPostList() {
+            document.getElementById('post-list').style.display = 'block';
+            document.getElementById('post-detail').style.display = 'none';
+            document.querySelector('.back-button').style.display = 'none';
+            document.title = 'My Blog';
+            
+            // Show loading message
+            document.getElementById('post-list').innerHTML = '<div class="loading">Loading posts...</div>';
+            
+            // Load posts from posts.json
+            await loadPostsData();
+            
+            if (discoveredPosts.length === 0) {
+                document.getElementById('post-list').innerHTML = `
+                    <div class="post-preview">
+                        <div class="post-header">
+                            <h2 class="post-title">Welcome to Your Blog!</h2>
+                            <div class="post-meta">
+                                <span>📅 ${formatDate(new Date().toISOString().split('T')[0])}</span>
+                                <span>👤 Author</span>
+                            </div>
+                        </div>
+                        <div class="post-content">
+                            <p>No posts found yet. Create your first post by adding a .md file to the posts/ folder!</p>
+                            <p>The GitHub Action will automatically generate the posts.json file when you push your changes.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            const postsHtml = discoveredPosts.map(createPostPreview).join('');
+            document.getElementById('post-list').innerHTML = postsHtml;
+        }
+
+        // Load and display individual post
+        async function loadPost(filename) {
+            try {
+                document.getElementById('post-list').style.display = 'none';
+                document.getElementById('post-detail').style.display = 'block';
+                document.querySelector('.back-button').style.display = 'inline-block';
+                
+                document.getElementById('post-detail').innerHTML = '<div class="loading">Loading post...</div>';
+                
+                const response = await fetch(`posts/${filename}`);
+                if (!response.ok) {
+                    throw new Error('Post not found');
+                }
+                
+                const markdownContent = await response.text();
+                const { frontmatter, content } = parseFrontmatter(markdownContent);
+                
+                // Convert markdown to HTML
+                const htmlContent = marked.parse(content);
+                
+                // Create tags HTML
+                const tags = frontmatter.tags || [];
+                const tagsHtml = Array.isArray(tags) 
+                    ? tags.map(tag => `<span class="tag">${tag}</span>`).join('')
+                    : '';
+                
+                const postHtml = `
+                    <div class="post-header">
+                        <h1 class="post-title">${frontmatter.title || 'Untitled'}</h1>
+                        <div class="post-meta">
+                            <span>📅 ${formatDate(frontmatter.date || new Date().toISOString().split('T')[0])}</span>
+                            <span>👤 ${frontmatter.author || 'Author'}</span>
+                            <div>${tagsHtml}</div>
+                        </div>
+                    </div>
+                    <div class="post-content">
+                        ${htmlContent}
+                    </div>
+                `;
+                
+                document.getElementById('post-detail').innerHTML = postHtml;
+                document.title = `${frontmatter.title || 'Post'} - My Blog`;
+                
+                // Scroll to top
+                window.scrollTo(0, 0);
+                
+            } catch (error) {
+                document.getElementById('post-detail').innerHTML = `
+                    <div class="post-content">
+                        <h2>Post Not Found</h2>
+                        <p>Sorry, the requested post could not be loaded.</p>
+                        <p>Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize blog
+        document.addEventListener('DOMContentLoaded', function() {
+            showPostList();
+            
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', function(event) {
+                if (event.state && event.state.post) {
+                    loadPost(event.state.post);
+                } else {
+                    showPostList();
+                }
+            });
+        });
+
+        // Update browser history when loading posts
+        const originalLoadPost = loadPost;
+        loadPost = function(filename) {
+            history.pushState({ post: filename }, '', `#${filename}`);
+            return originalLoadPost(filename);
+        };
+
+        // Handle initial hash in URL
+        window.addEventListener('load', function() {
+            if (window.location.hash) {
+                const filename = window.location.hash.substring(1);
+                if (filename) {
+                    loadPost(filename);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
