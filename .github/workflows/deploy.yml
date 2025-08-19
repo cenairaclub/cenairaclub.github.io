@@ -14,9 +14,10 @@ on:
 permissions:
   contents: write
   pages: write
+  id-token: write
 
 jobs:
-  generate-posts:
+  generate-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -127,3 +128,15 @@ jobs:
         git add posts.json
         git diff --staged --quiet || git commit -m "Auto-generate posts.json [skip ci]"
         git push
+    
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+    
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
+    
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
